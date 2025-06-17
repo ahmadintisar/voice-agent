@@ -6,7 +6,7 @@ import sys
 from io import StringIO
 import logging
 import shutil
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 # Add the project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, "src")
