@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(project_root, "src"))
 
-from src.voice_assistant import VoiceAssistant
+from voice_assistant import VoiceAssistant
 import threading
 import queue
 
