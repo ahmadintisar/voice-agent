@@ -10,6 +10,7 @@ voice_agent/
 ├── .gitignore             # Git ignore file
 ├── README.md              # This file
 ├── requirements.txt       # Python dependencies
+├── render.yaml           # Render deployment configuration
 ├── run.py                # Main application entry point
 ├── setup.py              # Package setup file
 ├── src/                  # Source code directory
@@ -26,12 +27,11 @@ voice_agent/
 │       └── config.py         # Configuration settings
 └── web/                 # Web interface
     ├── index.html           # Main HTML file
-    ├── static/             # Static assets
-    │   ├── css/
-    │   │   └── style.css    # Stylesheet
-    │   └── js/
-    │       └── app.js       # Frontend JavaScript
-    └── templates/          # HTML templates
+    └── static/             # Static assets
+        ├── css/
+        │   └── style.css    # Stylesheet
+        └── js/
+            └── app.js       # Frontend JavaScript
 ```
 
 ## Setup Instructions
