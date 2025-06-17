@@ -11,7 +11,7 @@ import shutil
 # current_dir = os.path.dirname(os.path.abspath(__file__))
 # src_path = os.path.join(current_dir, "src")
 # sys.path.insert(0, src_path)
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from voice_assistant import VoiceAssistant
 import threading
 import queue
