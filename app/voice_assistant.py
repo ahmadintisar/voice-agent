@@ -1,8 +1,8 @@
 import datetime
 import re
 from pathlib import Path
-
-from audio.audio_handler import AudioHandler
+#Fixed
+from speech.audio_handler import AudioHandler
 from ai.ai_handler import AIHandler
 from utils.config import Config
 
