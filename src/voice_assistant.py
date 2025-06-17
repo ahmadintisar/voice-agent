@@ -1,12 +1,12 @@
 import datetime
 import re
 from pathlib import Path
-# from audio import AudioHandler
-# from ai import AIHandler
-# from utils import Config
-from src.audio.audio_handler import AudioHandler
-from src.ai.ai_handler import AIHandler
-from src.utils.config import Config
+from audio import AudioHandler
+from ai import AIHandler
+from utils import Config
+# from src.audio.audio_handler import AudioHandler
+# from src.ai.ai_handler import AIHandler
+# from src.utils.config import Config
 
 class VoiceAssistant:
     def __init__(self, config: Config = None):
