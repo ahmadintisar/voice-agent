@@ -1,11 +1,10 @@
 services:
   - type: web
     name: voice-assistant
-    env: python
-    buildCommand: pip install -e .
-    startCommand: python run.py
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
     envVars:
       - key: OPENAI_API_KEY
         sync: false
-      - key: PYTHON_VERSION
-        value: 3.12.0 
