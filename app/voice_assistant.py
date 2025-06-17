@@ -21,6 +21,59 @@ class VoiceAssistant:
         )
         self.round_no = 1
 
+    def transcribe_from_file(self, audio_path: Path) -> str:
+        """
+        Transcribes a WAV audio file using the integrated Whisper model.
+
+        Args:
+            audio_path (Path): Path to the .wav audio file
+
+        Returns:
+            str: Transcribed text
+        """
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio file does not exist: {audio_path}")
+
+        print(f"📥 Transcribing audio from file: {audio_path}")
+        transcript = self.ai_handler.transcribe_audio(audio_path)
+        print(f"📝 Transcription complete:\n{transcript}")
+        return transcript
+    
+    def process_text_with_gpt(self, text: str) -> str:
+        """
+        Processes input text using the GPT model.
+
+        Args:
+            text (str): User's transcribed input
+
+        Returns:
+            str: GPT-generated response
+        """
+        if not text.strip():
+            raise ValueError("Input text is empty.")
+        print(f"🧠 Sending to GPT: {text}")
+        response = self.ai_handler.get_gpt_response(text)
+        print(f"🤖 GPT Response: {response}")
+        return response
+    
+    def text_to_speech(self, text: str) -> Path:
+        """
+        Convert GPT response text to speech and save as MP3 or WAV.
+
+        Args:
+            text (str): The text to synthesize
+
+        Returns:
+            Path: The path to the saved audio file
+        """
+        if not text.strip():
+            raise ValueError("Cannot synthesize empty text.")
+
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = self.config.OUT_DIR / f"response_{ts}.mp3"
+        self.audio_handler.speak(text, output_path)
+        return output_path
+    
     def process_user_input(self, pcm: bytes) -> tuple[str, Path]:
         """Process user's audio input and return transcript and file path"""
         if not pcm:
