@@ -2,7 +2,7 @@ services:
   - type: web
     name: voice-assistant
     env: docker
-    plan: free
+    plan: starter
     dockerfilePath: ./Dockerfile
     autoDeploy: true
     envVars:
