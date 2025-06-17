@@ -9,6 +9,7 @@ import shutil
 
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(project_root, "src"))
 
 from src.voice_assistant import VoiceAssistant
 import threading
