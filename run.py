@@ -8,7 +8,9 @@ import logging
 import shutil
 
 # Add the project root to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "app"))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+app_dir = os.path.join(current_dir, "app")
+sys.path.insert(0, app_dir)
 
 from app.voice_assistant import VoiceAssistant
 import threading
