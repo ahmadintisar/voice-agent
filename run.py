@@ -2,13 +2,17 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 from pathlib import Path
-from src.voice_assistant import VoiceAssistant
-import threading
-import queue
 import sys
 from io import StringIO
 import logging
 import shutil
+
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.voice_assistant import VoiceAssistant
+import threading
+import queue
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
