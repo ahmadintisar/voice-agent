@@ -133,6 +133,11 @@ import threading
 import queue
 from flask import Response
 import json
+from flask_cors import CORS 
+import re   
+from flask import abort
+import requests
+
 
 # Add the project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -149,6 +154,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+CORS(app, origins="*", supports_credentials=True)
 # Clear audio directory on startup
 AUDIO_DIR = Path("audio")
 if AUDIO_DIR.exists():
@@ -264,20 +270,22 @@ def process_audio():
 
 @app.route('/api/stream-process-audio', methods=['POST'])
 def stream_process_audio():
+    # Move file extraction OUTSIDE the generator
+    if 'audio' not in request.files:
+        return Response(
+            f"data: {json.dumps({'status': 'error', 'message': 'No audio file uploaded'})}\n\n",
+            mimetype='text/event-stream'
+        )
+
+    audio_file = request.files['audio']
+    audio_path = AUDIO_DIR / audio_file.filename
+    audio_file.save(audio_path)
+    logger.info(f"✅ Received audio file: {audio_path}")
+
     def generate():
         try:
-            if 'audio' not in request.files:
-                yield f"data: {json.dumps({'status': 'error', 'message': 'No audio file uploaded'})}\n\n"
-                return
-
-            audio_file = request.files['audio']
-            audio_path = AUDIO_DIR / audio_file.filename
-            audio_file.save(audio_path)
-
-            logger.info(f"✅ Received audio file: {audio_path}")
-
             # Step 1: Transcribe
-            transcript = assistant.transcribe_audio(audio_path)
+            transcript = assistant.transcribe_from_file(audio_path)
             logger.info(f"📝 Transcription: {transcript}")
             yield f"data: {json.dumps({'type': 'transcript', 'value': transcript})}\n\n"
 
@@ -291,7 +299,6 @@ def stream_process_audio():
             logger.info(f"🔊 TTS output saved at: {audio_output_path}")
             yield f"data: {json.dumps({'type': 'audio', 'value': f'/audio/{audio_output_path.name}'})}\n\n"
 
-            # End of stream
             yield f"event: end\ndata: end\n\n"
 
         except Exception as e:
@@ -299,19 +306,46 @@ def stream_process_audio():
             yield f"data: {json.dumps({'status': 'error', 'message': str(e)})}\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
-
 from flask import send_from_directory
 
-@app.route('/audio/<path:filename>')
-def serve_audio(filename):
-    return send_from_directory(AUDIO_DIR, filename)
-# Optional: Route to serve generated audio file
-@app.route("/api/audio/<filename>", methods=["GET"])
+
+@app.route("/audio/<filename>")
 def serve_audio(filename):
     file_path = AUDIO_DIR / filename
-    if file_path.exists():
-        return send_file(file_path, mimetype="audio/wav")
-    return jsonify({"error": "File not found"}), 404
+    if not os.path.isfile(file_path):
+        abort(404)
+
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        # Full file delivery as fallback
+        return send_file(file_path, mimetype='audio/mpeg')
+
+    # Parse range header
+    size = os.path.getsize(file_path)
+    byte1, byte2 = 0, None
+    match = re.search(r'bytes=(\d+)-(\d*)', range_header)
+    if match:
+        g = match.groups()
+        byte1 = int(g[0])
+        if g[1]:
+            byte2 = int(g[1])
+
+    length = (byte2 + 1 if byte2 else size) - byte1
+    with open(file_path, 'rb') as f:
+        f.seek(byte1)
+        data = f.read(length)
+
+    response = Response(data, 206, mimetype='audio/mpeg', direct_passthrough=True)
+    response.headers.add('Content-Range', f'bytes {byte1}-{byte1 + length - 1}/{size}')
+    response.headers.add('Accept-Ranges', 'bytes')
+    return response
+# Optional: Route to serve generated audio file
+# @app.route("/api/audio/<filename>", methods=["GET"])
+# def serve_audio(filename):
+#     file_path = AUDIO_DIR / filename
+#     if file_path.exists():
+#         return send_file(file_path, mimetype="audio/wav")
+#     return jsonify({"error": "File not found"}), 404
 
 def main():
     try:
